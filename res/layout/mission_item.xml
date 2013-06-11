@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android"
+        >
+    <TextView
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:text="1"
+            android:id="@+id/id" android:layout_gravity="center|left" android:textSize="20dp"
+            android:padding="10dp" android:textAlignment="center"/>
+    <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Observations"
+            android:id="@+id/obs" android:layout_gravity="center|left" android:textSize="20dp"
+            android:textAlignment="center"/>
+</LinearLayout>
