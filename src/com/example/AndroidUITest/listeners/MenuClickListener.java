@@ -5,6 +5,9 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.view.View;
 import android.widget.AdapterView;
+import com.example.AndroidUITest.ActivityUtils;
+import com.example.AndroidUITest.activities.HomeActivity;
+import com.example.AndroidUITest.activities.MissionDescriptionActivity;
 import com.example.AndroidUITest.models.MenuItem;
 
 import java.lang.reflect.Constructor;
@@ -14,12 +17,12 @@ import java.util.List;
 public class MenuClickListener implements AdapterView.OnItemClickListener {
 
     private final List<MenuItem> menu;
-    private final FragmentManager fragmentManager;
     private final int container;
+    private final MissionDescriptionActivity activity;
 
-    public MenuClickListener(FragmentManager manager, List<MenuItem> menu, int container) {
+    public MenuClickListener(MissionDescriptionActivity activity, List<MenuItem> menu, int container) {
         this.menu = menu;
-        this.fragmentManager = manager;
+        this.activity = activity;
         this.container = container;
     }
 
@@ -27,12 +30,21 @@ public class MenuClickListener implements AdapterView.OnItemClickListener {
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
         MenuItem menuItem = menu.get(position);
         Class<? extends Fragment> fragment = menuItem.getFragment();
+
+        // go back to home
+        if(fragment == null) {
+            ActivityUtils.startNewActivity(activity, HomeActivity.class);
+            return;
+        }
+
+        FragmentManager fragmentManager = activity.getFragmentManager();
         try {
             Constructor<? extends Fragment> constructor = fragment.getConstructor();
             Fragment fragmentInstance = constructor.newInstance();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             fragmentTransaction.replace(container, fragmentInstance);
             fragmentTransaction.addToBackStack(null);
+            activity.onViewChange();
             fragmentTransaction.commit();
         } catch (NoSuchMethodException e) {
             e.printStackTrace();

@@ -13,15 +13,7 @@ public class Mission {
         return id;
     }
 
-    public void setId(long id) {
-        this.id = id;
-    }
-
     public String getObservation() {
         return observation;
-    }
-
-    public void setObservation(String observation) {
-        this.observation = observation;
     }
 }

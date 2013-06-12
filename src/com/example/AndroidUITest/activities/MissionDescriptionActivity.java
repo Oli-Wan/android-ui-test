@@ -18,6 +18,8 @@ import java.util.List;
 
 public class MissionDescriptionActivity extends Activity {
 
+    private SlidingMenu slidingMenu;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         System.out.println("Creation");
@@ -31,7 +33,7 @@ public class MissionDescriptionActivity extends Activity {
         fragmentTransaction.commit();
 
         // Sliding menu
-        SlidingMenu slidingMenu = new SlidingMenu(this);
+        slidingMenu = new SlidingMenu(this);
         slidingMenu.setMode(SlidingMenu.LEFT);
         slidingMenu.attachToActivity(this, SlidingMenu.SLIDING_CONTENT);
         slidingMenu.setBehindWidth(300);
@@ -46,6 +48,10 @@ public class MissionDescriptionActivity extends Activity {
         menu.add(new MenuItem("Véhicules", VehicleListFragment.class));
         menu.add(new MenuItem("Retour à la liste", null));
         list.setAdapter(new MenuAdapter(getBaseContext(), menu));
-        list.setOnItemClickListener(new MenuClickListener(fragmentManager, menu, R.id.fragmentContainer));
+        list.setOnItemClickListener(new MenuClickListener(this, menu, R.id.fragmentContainer));
+    }
+
+    public void onViewChange() {
+        slidingMenu.showContent(true);
     }
 }
