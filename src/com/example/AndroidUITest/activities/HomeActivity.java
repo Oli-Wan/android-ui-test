@@ -1,6 +1,7 @@
 package com.example.AndroidUITest.activities;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -17,9 +18,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class HomeActivity extends Activity {
-    /**
-     * Called when the activity is first created.
-     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,7 +32,8 @@ public class HomeActivity extends Activity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                System.out.println("Go to mission");
+                Intent intent = new Intent(getBaseContext(), UpdateMissionActivity.class);
+                startActivity(intent);
             }
         });
         listView.setClickable(true);
