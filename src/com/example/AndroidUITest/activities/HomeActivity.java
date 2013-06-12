@@ -5,16 +5,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 import com.example.AndroidUITest.R;
 import com.example.AndroidUITest.adapters.MissionAdapter;
 import com.example.AndroidUITest.models.Mission;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public class HomeActivity extends Activity {
@@ -32,7 +28,7 @@ public class HomeActivity extends Activity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Intent intent = new Intent(getBaseContext(), UpdateMissionActivity.class);
+                Intent intent = new Intent(getBaseContext(), MissionDescriptionActivity.class);
                 startActivity(intent);
             }
         });
