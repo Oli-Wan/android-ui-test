@@ -12,7 +12,7 @@ import com.example.AndroidUITest.models.Mission;
 import java.util.List;
 
 public class MissionAdapter extends ArrayAdapter<Mission> {
-   private List<Mission> values;
+    private List<Mission> values;
     private Context context;
 
     public MissionAdapter(Context context, List<Mission> objects) {
