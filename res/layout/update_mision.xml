@@ -3,11 +3,131 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
               android:layout_width="match_parent"
-              android:layout_height="match_parent">
+              android:layout_height="match_parent" android:focusable="false"
+              android:paddingRight="20dp" android:paddingLeft="10dp" android:paddingTop="10dp">
 
     <TextView
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:text="Update mission view"
-            android:id="@+id/textView" android:layout_gravity="left|center_vertical" android:textSize="50dp"/>
+            android:layout_height="wrap_content"
+            android:text="Mission 1234"
+            android:id="@+id/textView" android:layout_gravity="left|center_vertical" android:textSize="25dp"/>
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="40dp" android:layout_gravity="center">
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Raison"
+                android:id="@+id/reasonLabel" android:layout_gravity="left|center_vertical" android:width="150dp"
+                android:gravity="right" android:paddingRight="10dp"/>
+        <EditText
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:hint="Raison"
+                android:id="@+id/reasonEdit" android:layout_gravity="right|center_vertical"/>
+    </LinearLayout>
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="40dp" android:layout_gravity="center" android:gravity="center_vertical">
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Type"
+                android:id="@+id/typeLabel" android:layout_gravity="left|center_vertical" android:width="150dp"
+                android:gravity="right" android:paddingRight="10dp"/>
+        <Spinner
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:id="@+id/typeSpinner" android:layout_gravity="center"/>
+    </LinearLayout>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Appelant"
+            android:id="@+id/textView1" android:layout_gravity="left|center_vertical" android:textSize="20dp"/>
+
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="40dp" android:layout_gravity="center" android:gravity="center_vertical">
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Prénom"
+                android:id="@+id/firstnameLabel" android:layout_gravity="left|center_vertical" android:width="150dp"
+                android:gravity="right" android:paddingRight="10dp"/>
+        <EditText
+                android:layout_width="fill_parent"
+                android:layout_height="120dp"
+                android:singleLine="false"
+                android:hint="Observation"
+                android:id="@+id/obsEdit" android:layout_gravity="center_horizontal|bottom" android:gravity="top"/>
+        <EditText
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:hint="Prénom"
+                android:id="@+id/firstnameEdit" android:layout_gravity="right|center_vertical"/>
+    </LinearLayout>
+
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="40dp" android:layout_gravity="center" android:gravity="center_vertical">
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nom"
+                android:id="@+id/lastnameLabel" android:layout_gravity="left|center_vertical" android:width="150dp"
+                android:gravity="right" android:paddingRight="10dp"/>
+        <EditText
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:hint="Nom"
+                android:id="@+id/lastnameEdit" android:layout_gravity="right|center_vertical"/>
+    </LinearLayout>
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="40dp" android:layout_gravity="center" android:gravity="center_vertical">
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Téléphone"
+                android:id="@+id/phoneLabel" android:layout_gravity="left|center_vertical" android:width="150dp"
+                android:gravity="right" android:paddingRight="10dp"/>
+        <EditText
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:hint="Numéro"
+                android:id="@+id/phoneEdit" android:layout_gravity="right|center_vertical"/>
+    </LinearLayout>
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Observation"
+            android:id="@+id/textView2" android:layout_gravity="left|center_vertical" android:textSize="20dp"/>
+    <EditText
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:height="120dp"
+            android:hint="Observation"
+            android:gravity="top"
+            android:id="@+id/obsEdit" android:layout_gravity="right|center_vertical"/>
+
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="40dp" android:layout_gravity="left|center_vertical"
+            android:gravity="center_vertical|center_horizontal">
+        <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sauvegarder"
+                android:id="@+id/button"/>
+    </LinearLayout>
+
+
 </LinearLayout>
