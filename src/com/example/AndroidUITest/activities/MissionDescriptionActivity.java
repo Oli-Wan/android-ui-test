@@ -5,7 +5,9 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ListView;
+import com.example.AndroidUITest.ActivityUtils;
 import com.example.AndroidUITest.R;
 import com.example.AndroidUITest.activities.fragments.*;
 import com.example.AndroidUITest.adapters.MenuAdapter;
@@ -53,5 +55,10 @@ public class MissionDescriptionActivity extends Activity {
 
     public void onViewChange() {
         slidingMenu.showContent(true);
+    }
+
+
+    public void goToNewEvent(View view) {
+        ActivityUtils.startNewActivity(this, AddEventActivity.class);
     }
 }

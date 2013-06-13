@@ -41,16 +41,19 @@
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent" android:layout_gravity="center"
                 android:weightSum="1.0">
-            <DatePicker
+            <Button
                     android:layout_width="0dp"
                     android:layout_weight="0.5"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/endDatePicker" android:layout_gravity="center"/>
-            <TimePicker
+                    android:layout_height="fill_parent"
+                    android:onClick="pickStartDate" android:text="Date"
+                    android:id="@+id/startDatePicker" android:layout_gravity="center" />
+            <Button
                     android:layout_weight="0.5"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/startTimePicker" android:layout_gravity="center"/>
+                    android:layout_height="fill_parent"
+                    android:onClick="pickStartTime"
+                    android:id="@+id/startTimePicker" android:layout_gravity="center" android:text="Heure"
+                    android:gravity="center" android:textSize="20dp" />
         </LinearLayout>
     </LinearLayout>
     <LinearLayout
@@ -69,16 +72,19 @@
                 android:layout_height="fill_parent" android:layout_gravity="center"
                 android:weightSum="1.0">
 
-            <DatePicker
+            <Button
                     android:layout_width="0dp"
                     android:layout_weight="0.5"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/endDatePicker" android:layout_gravity="center"/>
-            <TimePicker
-                    android:layout_width="0dp"
+                    android:layout_height="fill_parent"
+                    android:onClick="pickEndDate" android:text="Date"
+                    android:id="@+id/endDatePicker" android:layout_gravity="center" />
+            <Button
                     android:layout_weight="0.5"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/endTimePicker" android:layout_gravity="center"/>
+                    android:layout_width="0dp"
+                    android:layout_height="fill_parent"
+                    android:onClick="pickEndTime"
+                    android:id="@+id/endTimePicker" android:layout_gravity="center" android:text="Heure"
+                    android:gravity="center" android:textSize="20dp" />
         </LinearLayout>
     </LinearLayout>
     <LinearLayout
