@@ -1,15 +1,15 @@
 package com.example.AndroidUITest.models;
 
 public class Command {
-    private String date;
+    private long date;
     private String origin;
     private String data;
 
-    public String getDate() {
+    public long getDate() {
         return date;
     }
 
-    public void setDate(String date) {
+    public void setDate(long date) {
         this.date = date;
     }
 

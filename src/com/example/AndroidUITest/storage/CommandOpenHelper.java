@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CommandOpenHelper extends SQLiteOpenHelper {
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 5;
     private static final String TABLE_NAME = "command";
 
     private static final String COL_DATE = "date";
@@ -25,7 +25,7 @@ public class CommandOpenHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         String createQuery = "CREATE TABLE " + TABLE_NAME +
-                "(" + COL_DATE + " TEXT," +
+                "(" + COL_DATE + " INTEGER, " +
                 COL_ORIGIN + " TEXT, " +
                 COL_DATA + " TEXT);";
         db.execSQL(createQuery);
@@ -43,16 +43,21 @@ public class CommandOpenHelper extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery("SELECT * FROM command", null);
         if (cursor.moveToFirst()) {
             do {
-                Command command = new Command();
-                command.setDate(cursor.getString(1));
-                command.setOrigin(cursor.getString(2));
-                command.setData(cursor.getString(3));
+                Command command = extractCommandFromCursor(cursor);
                 commands.add(command);
             } while (cursor.moveToNext());
         }
         cursor.close();
         db.close();
         return commands;
+    }
+
+    private Command extractCommandFromCursor(Cursor cursor) {
+        Command command = new Command();
+        command.setDate(cursor.getLong(0));
+        command.setOrigin(cursor.getString(1));
+        command.setData(cursor.getString(2));
+        return command;
     }
 
     public void create(Command command) {
@@ -67,5 +72,18 @@ public class CommandOpenHelper extends SQLiteOpenHelper {
 
     public void clear() {
         onUpgrade(this.getWritableDatabase(), 0, 0);
+    }
+
+    public Command getLastReceivedCommand() {
+        SQLiteDatabase db = getWritableDatabase();
+        Cursor cursor = db.query(TABLE_NAME, new String[]{"MAX(" + COL_DATE + ")", COL_ORIGIN, COL_DATA}, null, null, null, null, null);
+        Command command = null;
+        if (cursor.moveToFirst()) {
+            System.out.println(cursor.getCount());
+            command = extractCommandFromCursor(cursor);
+        }
+        cursor.close();
+        db.close();
+        return command;
     }
 }

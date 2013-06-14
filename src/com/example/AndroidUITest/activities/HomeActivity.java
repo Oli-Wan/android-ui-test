@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import com.example.AndroidUITest.messaging.BroadcastMessages;
+import com.example.AndroidUITest.network.CommandListener;
 import com.example.AndroidUITest.utils.ActivityUtils;
 import com.example.AndroidUITest.R;
 import com.example.AndroidUITest.adapters.MissionAdapter;
@@ -16,14 +18,15 @@ import com.example.AndroidUITest.storage.MissionOpenHelper;
 
 import java.util.List;
 
-public class HomeActivity extends Activity {
+public class HomeActivity extends Activity implements BroadcastMessages.onNewCommandListener {
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-
+        CommandListener.getInstance().init(getBaseContext());
+        CommandListener.getInstance().register(this);
         getMissions(null);
     }
 
@@ -53,5 +56,10 @@ public class HomeActivity extends Activity {
         for (Command cmd : commands) {
             System.out.println(cmd.getData());
         }
+    }
+
+    @Override
+    public void onNewCommand(Command command) {
+        System.out.println("onNewCommand");
     }
 }
