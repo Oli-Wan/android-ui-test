@@ -90,17 +90,13 @@ public class MissionOpenHelper extends SQLiteOpenHelper {
         values.put("type", mission.getType());
         values.put("vehicle", mission.getVehicle());
         values.put("responsible", mission.getResponsible());
-        System.out.println(mission.getId());
         boolean missionExists = get(mission.getId()) == null;
         SQLiteDatabase db = this.getWritableDatabase();
         if (missionExists ) {
-            System.out.println("insert");
             db.insert("mission", null, values);
         } else {
-            System.out.println("update");
             db.update("mission", values, "id = ?", new String[]{String.valueOf(mission.getId())});
         }
-
         db.close();
     }
 

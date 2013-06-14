@@ -5,7 +5,7 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.view.View;
 import android.widget.AdapterView;
-import com.example.AndroidUITest.ActivityUtils;
+import com.example.AndroidUITest.utils.ActivityUtils;
 import com.example.AndroidUITest.activities.HomeActivity;
 import com.example.AndroidUITest.activities.MissionDescriptionActivity;
 import com.example.AndroidUITest.models.MenuItem;

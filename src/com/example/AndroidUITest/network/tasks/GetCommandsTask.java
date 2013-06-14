@@ -35,7 +35,6 @@ public class GetCommandsTask extends AsyncTask<Void, Void, JSONArray> {
 
     @Override
     protected JSONArray doInBackground(Void... voids) {
-        System.out.println("Task");
         JSONArray json = null;
         try {
             HttpClient client = new DefaultHttpClient();
