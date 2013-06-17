@@ -4,6 +4,7 @@ public class Command {
     private long date;
     private String origin;
     private String data;
+    private String status;
 
     public long getDate() {
         return date;
@@ -32,5 +33,13 @@ public class Command {
     @Override
     public String toString() {
         return "Command sent at "+date+" from "+origin+" with data "+data;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getStatus() {
+        return status;
     }
 }

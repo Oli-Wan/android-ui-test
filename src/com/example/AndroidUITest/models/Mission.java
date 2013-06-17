@@ -1,6 +1,6 @@
 package com.example.AndroidUITest.models;
 
-public class Mission {
+public class Mission implements Identifiable {
     private long id;
     private String observation;
     private String type;
