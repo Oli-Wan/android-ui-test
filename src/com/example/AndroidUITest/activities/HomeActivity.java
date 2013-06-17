@@ -30,8 +30,8 @@ public class HomeActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-        Log.d("HomeActivity", "START");
-        CommandListener.getInstance().init(getBaseContext());
+        if(!CommandListener.getInstance().getStarted())
+            CommandListener.getInstance().start(getBaseContext());
     }
 
     @Override
