@@ -47,7 +47,7 @@ public class CommandListener {
 
         this.commands = new CommandOpenHelper(context);
         this.missions = new MissionOpenHelper(context);
-        client = new SocketIOClient(URI.create(BACKEND_URL), new CommandClient());
+        this.client = new SocketIOClient(URI.create(BACKEND_URL), new CommandClient());
         parseCommands();
     }
 

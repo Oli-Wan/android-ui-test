@@ -23,6 +23,9 @@ import java.util.List;
 public class HomeActivity extends Activity {
 
     private Messenger messenger;
+    private List<Mission> missions;
+    private NetworkServiceConnection networkServiceConnection;
+    private Messenger networkService;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -32,7 +35,8 @@ public class HomeActivity extends Activity {
 
         Intent intent = new Intent(this, MissionMessagingService.class);
         startService(intent);
-        bindService(intent, new NetworkServiceConnection(), Context.BIND_AUTO_CREATE);
+        networkServiceConnection = new NetworkServiceConnection();
+        bindService(intent, networkServiceConnection, Context.BIND_AUTO_CREATE);
 
         setContentView(R.layout.main);
         CommandListener.getInstance().init(getBaseContext());
@@ -56,7 +60,7 @@ public class HomeActivity extends Activity {
     private class NetworkServiceConnection implements ServiceConnection {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
-            Messenger networkService = new Messenger(service);
+            networkService = new Messenger(service);
             try {
                 Message msg = Message.obtain(null, MissionMessagingService.REGISTER);
                 msg.replyTo = messenger;
@@ -74,17 +78,31 @@ public class HomeActivity extends Activity {
 
 
     private void loadCommands() {
-        List<Mission> missions = new MissionOpenHelper(getBaseContext()).getAll();
+        missions = new MissionOpenHelper(getBaseContext()).getAll();
 
         ListView listView = (ListView) findViewById(R.id.listView);
         final Activity currentActivity = this;
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                ActivityUtils.startNewActivity(currentActivity, MissionDescriptionActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putLong("MISSION_ID", missions.get(i).getId());
+                ActivityUtils.startNewActivity(currentActivity, MissionDescriptionActivity.class, bundle);
             }
         });
         listView.setClickable(true);
         listView.setAdapter(new MissionAdapter(getBaseContext(), missions));
+    }
+
+    @Override
+    protected void onDestroy() {
+        Message message = Message.obtain(null, MissionMessagingService.UNREGISTER);
+        message.replyTo = messenger;
+        try {
+            networkService.send(message);
+        } catch (RemoteException e) {
+            Log.e("HomeActivity", "Error", e);
+        }
+        unbindService(networkServiceConnection);
     }
 }
