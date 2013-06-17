@@ -33,7 +33,7 @@ public class MenuClickListener implements AdapterView.OnItemClickListener {
 
         // go back to home
         if(fragment == null) {
-            ActivityUtils.startNewActivity(activity, HomeActivity.class);
+            ActivityUtils.startNewActivity(activity, HomeActivity.class, null);
             return;
         }
 

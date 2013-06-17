@@ -28,6 +28,7 @@ public class CommandListener {
     private MissionOpenHelper missions;
     private SocketIOClient client;
     private Messenger messenger;
+    private boolean started = false;
 
     private CommandListener() {
     }
@@ -40,16 +41,25 @@ public class CommandListener {
         return CommandListenerHolder.INSTANCE;
     }
 
-    public void init(Context context) {
+    public void start(Context context) {
+        if(started)
+            return;
+
         Intent intent = new Intent(context, MissionMessagingService.class);
         context.startService(intent);
         context.bindService(intent, new NetworkServiceConnection(), Context.BIND_AUTO_CREATE);
 
         this.commands = new CommandOpenHelper(context);
         this.missions = new MissionOpenHelper(context);
-        client = new SocketIOClient(URI.create(BACKEND_URL), new CommandClient());
+        this.client = new SocketIOClient(URI.create(BACKEND_URL), new CommandClient());
         parseCommands();
+        started = true;
     }
+
+    public boolean getStarted() {
+        return started;
+    }
+
 
     private class NetworkServiceConnection implements ServiceConnection {
         @Override
@@ -186,7 +196,7 @@ public class CommandListener {
                     mission.setResponsible(change.getString("new_val"));
                 }
             }
-            missions.create(mission);
+            missions.incomingChanges(mission);
         }
     }
 }

@@ -49,13 +49,7 @@ public class MissionOpenHelper extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery("SELECT * FROM mission", null);
         if (cursor.moveToFirst()) {
             do {
-                Mission mission = new Mission();
-                mission.setId(cursor.getLong(0));
-                mission.setObservation(cursor.getString(1));
-                mission.setType(cursor.getString(2));
-                mission.setVehicle(cursor.getString(3));
-                mission.setResponsible(cursor.getString(4));
-                missions.add(mission);
+                missions.add(getMissionFromContentValues(cursor));
             } while (cursor.moveToNext());
         }
         cursor.close();
@@ -71,36 +65,58 @@ public class MissionOpenHelper extends SQLiteOpenHelper {
         Mission mission = null;
         if (cursor.getCount() == 1) {
             cursor.moveToFirst();
-            mission = new Mission();
-            mission.setId(cursor.getLong(0));
-            mission.setObservation(cursor.getString(1));
-            mission.setType(cursor.getString(2));
-            mission.setVehicle(cursor.getString(3));
-            mission.setResponsible(cursor.getString(4));
+            mission = getMissionFromContentValues(cursor);
         }
         cursor.close();
         db.close();
         return mission;
     }
 
+    public void incomingChanges(Mission mission) {
+        boolean missionExists = get(mission.getId()) == null;
+        if (missionExists) {
+            this.update(mission);
+        } else {
+            this.create(mission);
+        }
+    }
+
+
     public void create(Mission mission) {
+        ContentValues values = getContentValuesFromMission(mission);
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.insert("mission", null, values);
+        db.close();
+    }
+
+    public void update(Mission mission) {
+        ContentValues values = getContentValuesFromMission(mission);
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.update("mission", values, "id = ?", new String[]{String.valueOf(mission.getId())});
+        db.close();
+    }
+
+    public void clear() {
+        onUpgrade(this.getWritableDatabase(), 0, 0);
+    }
+
+    private ContentValues getContentValuesFromMission(Mission mission) {
         ContentValues values = new ContentValues();
         values.put("id", mission.getId());
         values.put("observation", mission.getObservation());
         values.put("type", mission.getType());
         values.put("vehicle", mission.getVehicle());
         values.put("responsible", mission.getResponsible());
-        boolean missionExists = get(mission.getId()) == null;
-        SQLiteDatabase db = this.getWritableDatabase();
-        if (missionExists ) {
-            db.insert("mission", null, values);
-        } else {
-            db.update("mission", values, "id = ?", new String[]{String.valueOf(mission.getId())});
-        }
-        db.close();
+        return values;
     }
 
-    public void clear() {
-        onUpgrade(this.getWritableDatabase(), 0, 0);
+    private Mission getMissionFromContentValues(Cursor cursor) {
+        Mission mission = new Mission();
+        mission.setId(cursor.getLong(0));
+        mission.setObservation(cursor.getString(1));
+        mission.setType(cursor.getString(2));
+        mission.setVehicle(cursor.getString(3));
+        mission.setResponsible(cursor.getString(4));
+        return mission;
     }
 }

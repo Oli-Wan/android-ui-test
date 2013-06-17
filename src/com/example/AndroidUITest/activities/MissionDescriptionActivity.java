@@ -7,12 +7,12 @@ import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
-import com.example.AndroidUITest.utils.ActivityUtils;
 import com.example.AndroidUITest.R;
 import com.example.AndroidUITest.activities.fragments.*;
 import com.example.AndroidUITest.adapters.MenuAdapter;
 import com.example.AndroidUITest.listeners.MenuClickListener;
 import com.example.AndroidUITest.models.MenuItem;
+import com.example.AndroidUITest.utils.ActivityUtils;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 
 import java.util.ArrayList;
@@ -59,6 +59,6 @@ public class MissionDescriptionActivity extends Activity {
 
 
     public void goToNewEvent(View view) {
-        ActivityUtils.startNewActivity(this, AddEventActivity.class);
+        ActivityUtils.startNewActivity(this, AddEventActivity.class, null);
     }
 }
