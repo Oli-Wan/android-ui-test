@@ -28,6 +28,13 @@ public class HomeActivity extends Activity {
     private Messenger networkService;
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d("HomeActivity", "START");
+        CommandListener.getInstance().init(getBaseContext());
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -39,7 +46,6 @@ public class HomeActivity extends Activity {
         bindService(intent, networkServiceConnection, Context.BIND_AUTO_CREATE);
 
         setContentView(R.layout.main);
-        CommandListener.getInstance().init(getBaseContext());
         loadCommands();
     }
 
