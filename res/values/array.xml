@@ -4,4 +4,13 @@
         <item>Primaire</item>
         <item>Secondaire</item>
     </string-array>
+    <string-array name="event_types">
+        <item>Intevention</item>
+        <item>Hospitalisation</item>
+        <item>Retour base</item>
+    </string-array>
+    <string-array name="vehicle_types">
+        <item>Hélicoptère</item>
+        <item>Camion</item>
+    </string-array>
 </resources>

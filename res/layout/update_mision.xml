@@ -60,12 +60,6 @@
                 android:gravity="right" android:paddingRight="10dp"/>
         <EditText
                 android:layout_width="fill_parent"
-                android:layout_height="120dp"
-                android:singleLine="false"
-                android:hint="Observation"
-                android:id="@+id/obsEdit" android:layout_gravity="center_horizontal|bottom" android:gravity="top"/>
-        <EditText
-                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:hint="Prénom"
                 android:id="@+id/firstnameEdit" android:layout_gravity="right|center_vertical"/>
