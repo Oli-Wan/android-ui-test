@@ -17,5 +17,6 @@
         </activity>
         <activity android:name=".activities.MissionDescriptionActivity"></activity>
         <activity android:name=".activities.AddEventActivity"/>
+        <service android:name="com.example.AndroidUITest.messaging.MissionMessagingService"/>
     </application>
 </manifest>

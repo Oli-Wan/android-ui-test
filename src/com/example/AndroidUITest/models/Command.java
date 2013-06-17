@@ -28,4 +28,9 @@ public class Command {
     public void setData(String data) {
         this.data = data;
     }
+
+    @Override
+    public String toString() {
+        return "Command sent at "+date+" from "+origin+" with data "+data;
+    }
 }

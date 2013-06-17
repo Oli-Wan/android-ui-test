@@ -57,6 +57,7 @@ public class CommandOpenHelper extends SQLiteOpenHelper {
         command.setDate(cursor.getLong(0));
         command.setOrigin(cursor.getString(1));
         command.setData(cursor.getString(2));
+        System.out.println(command);
         return command;
     }
 
@@ -79,7 +80,6 @@ public class CommandOpenHelper extends SQLiteOpenHelper {
         Cursor cursor = db.query(TABLE_NAME, new String[]{"MAX(" + COL_DATE + ")", COL_ORIGIN, COL_DATA}, null, null, null, null, null);
         Command command = null;
         if (cursor.moveToFirst()) {
-            System.out.println(cursor.getCount());
             command = extractCommandFromCursor(cursor);
         }
         cursor.close();

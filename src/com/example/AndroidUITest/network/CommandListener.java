@@ -1,10 +1,13 @@
 package com.example.AndroidUITest.network;
 
+import android.content.ComponentName;
 import android.content.Context;
-import android.os.AsyncTask;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.*;
 import android.util.Log;
 import com.codebutler.android_websockets.SocketIOClient;
-import com.example.AndroidUITest.messaging.BroadcastMessages;
+import com.example.AndroidUITest.messaging.MissionMessagingService;
 import com.example.AndroidUITest.models.Command;
 import com.example.AndroidUITest.models.Mission;
 import com.example.AndroidUITest.network.utils.NetworkUtils;
@@ -17,16 +20,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
 
 public class CommandListener {
 
-    private static final URI backendUri = URI.create("http://192.168.100.51:2403");
-    private List<BroadcastMessages.onNewCommandListener> listeners;
+    private static final String BACKEND_URL = "http://192.168.100.51:2403";
     private CommandOpenHelper commands;
     private MissionOpenHelper missions;
     private SocketIOClient client;
+    private Messenger messenger;
 
     private CommandListener() {
     }
@@ -39,17 +40,29 @@ public class CommandListener {
         return CommandListenerHolder.INSTANCE;
     }
 
-    public void register(BroadcastMessages.onNewCommandListener listener) {
-        this.listeners.add(listener);
-    }
-
     public void init(Context context) {
-        this.listeners = new ArrayList<BroadcastMessages.onNewCommandListener>();
+        Intent intent = new Intent(context, MissionMessagingService.class);
+        context.startService(intent);
+        context.bindService(intent, new NetworkServiceConnection(), Context.BIND_AUTO_CREATE);
+
         this.commands = new CommandOpenHelper(context);
         this.missions = new MissionOpenHelper(context);
-        client = new SocketIOClient(backendUri, new CommandClient());
+        client = new SocketIOClient(URI.create(BACKEND_URL), new CommandClient());
         parseCommands();
     }
+
+    private class NetworkServiceConnection implements ServiceConnection {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            messenger = new Messenger(service);
+            Log.d("CommandListener", "Connected to service");
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+        }
+    }
+
 
     private class CommandClient implements SocketIOClient.Handler {
         @Override
@@ -58,25 +71,27 @@ public class CommandListener {
 
         @Override
         public void on(String event, JSONArray arguments) {
+            if (!event.equals("commands:new"))
+                return;
+
             try {
-                Command command = createCommandFromJSON(arguments.getJSONObject(0));
-                for (BroadcastMessages.onNewCommandListener listener : listeners) {
-                    listener.onNewCommand(new Command());
-                }
+                createCommandFromJSON(arguments.getJSONObject(0));
+                messenger.send(Message.obtain(null, MissionMessagingService.MISSION_UPDATED));
             } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (RemoteException e) {
                 e.printStackTrace();
             }
         }
 
         @Override
         public void onDisconnect(int code, String reason) {
-            System.out.println(String.format("Disconnected! Code: %d Reason: %s", code, reason));
+            Log.d("CommandListener", String.format("Disconnected! Code: %d Reason: %s", code, reason));
         }
 
         @Override
         public void onError(Exception error) {
-            System.out.println("Error!");
-            error.printStackTrace();
+            Log.e("CommandListener", "Error", error);
         }
 
         @Override
@@ -100,13 +115,21 @@ public class CommandListener {
                 Command lastCmd = commands.getLastReceivedCommand();
                 String params = "";
 
-                if (lastCmd != null) {
-                    params = "?{\"date\": {\"$gt\":" + lastCmd.getDate() + "},\"$sort\": {\"date\": 1}}";
+                if (lastCmd != null && lastCmd.getDate() > 0) {
+                    params = "{\"date\":{\"$gt\":" + lastCmd.getDate() + "},\"$sort\":{\"date\":1}}";
                 }
 
-                HttpGet get = new HttpGet(backendUri.toString() + "/commands" + NetworkUtils.encodeParams(params));
+                System.out.println(params);
+                String getUrl = BACKEND_URL + "/commands" + "?" + NetworkUtils.encodeParams(params);
+                System.out.println(getUrl);
+
+                HttpGet get = new HttpGet(getUrl);
+
                 HttpResponse response = NetworkUtils.sendRequest(get);
                 JSONArray jsonArray = NetworkUtils.parseAsJsonArray(response);
+
+                if (jsonArray == null)
+                    return null;
 
                 try {
                     for (int i = 0; i < jsonArray.length(); i++) {
@@ -123,7 +146,7 @@ public class CommandListener {
             protected void onPostExecute(Void aVoid) {
                 client.connect();
             }
-        };
+        }.execute();
     }
 
     private Command createCommandFromJSON(JSONObject obj) {
