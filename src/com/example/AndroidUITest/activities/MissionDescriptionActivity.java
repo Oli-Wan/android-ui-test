@@ -5,17 +5,14 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
-import com.example.AndroidUITest.models.Mission;
-import com.example.AndroidUITest.storage.MissionOpenHelper;
-import com.example.AndroidUITest.utils.ActivityUtils;
 import com.example.AndroidUITest.R;
 import com.example.AndroidUITest.activities.fragments.*;
 import com.example.AndroidUITest.adapters.MenuAdapter;
 import com.example.AndroidUITest.listeners.MenuClickListener;
 import com.example.AndroidUITest.models.MenuItem;
+import com.example.AndroidUITest.utils.ActivityUtils;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 
 import java.util.ArrayList;
@@ -24,18 +21,12 @@ import java.util.List;
 public class MissionDescriptionActivity extends Activity {
 
     private SlidingMenu slidingMenu;
-    private Mission mission;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         System.out.println("Creation");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.mission_description);
-
-        Bundle extras = getIntent().getExtras();
-        long missionId = extras.getLong("MISSION_ID");
-        this.mission = new MissionOpenHelper(getBaseContext()).get(missionId);
-        Log.d("MissionDescriptionActivity", mission.getObservation());
 
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

@@ -196,7 +196,7 @@ public class CommandListener {
                     mission.setResponsible(change.getString("new_val"));
                 }
             }
-            missions.create(mission);
+            missions.incomingChanges(mission);
         }
     }
 }
