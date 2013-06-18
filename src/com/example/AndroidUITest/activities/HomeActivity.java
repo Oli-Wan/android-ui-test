@@ -16,14 +16,13 @@ import com.example.AndroidUITest.messaging.MissionMessagingService;
 import com.example.AndroidUITest.models.Mission;
 import com.example.AndroidUITest.network.CommandListener;
 import com.example.AndroidUITest.network.CommandSender;
-import com.example.AndroidUITest.storage.CommandOpenHelper;
-import com.example.AndroidUITest.storage.MissionOpenHelper;
+import com.example.AndroidUITest.storage.MissionDataSource;
 import com.example.AndroidUITest.utils.ActivityUtils;
 
 import java.util.List;
 
 public class HomeActivity extends Activity {
-
+    private boolean serviceBound = false;
     private Messenger messenger;
     private List<Mission> missions;
     private NetworkServiceConnection networkServiceConnection;
@@ -33,23 +32,17 @@ public class HomeActivity extends Activity {
     protected void onStart() {
         super.onStart();
         if (!CommandListener.getInstance().isStarted())
-            CommandListener.getInstance().start(getBaseContext());
+            CommandListener.getInstance().start(getApplicationContext());
 
-        if (!CommandSender.getInstance().isStarted())
-            CommandSender.getInstance().start(getBaseContext());
+        if (CommandSender.getInstance().isStarted())
+            CommandSender.getInstance().start(getApplicationContext());
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         this.messenger = new Messenger(new IncomingHandler());
-
-        Intent intent = new Intent(this, MissionMessagingService.class);
-        startService(intent);
-        networkServiceConnection = new NetworkServiceConnection();
-        bindService(intent, networkServiceConnection, Context.BIND_AUTO_CREATE);
-
+        bindService();
         setContentView(R.layout.main);
         loadCommands();
     }
@@ -87,11 +80,29 @@ public class HomeActivity extends Activity {
         }
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unbindService();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        bindService();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService();
+        CommandSender.getInstance().stop();
+        CommandListener.getInstance().stop();
+    }
 
     private void loadCommands() {
         Log.d("HomeActivity", "Loading commands");
-        missions = new MissionOpenHelper(getBaseContext()).getAll();
-
+        missions = new MissionDataSource().getAll();
         ListView listView = (ListView) findViewById(R.id.listView);
         final Activity currentActivity = this;
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -106,9 +117,10 @@ public class HomeActivity extends Activity {
         listView.setAdapter(new MissionAdapter(getBaseContext(), missions));
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    private void unbindService() {
+        if(!serviceBound)
+            return;
+
         Message message = Message.obtain(null, MissionMessagingService.UNREGISTER);
         message.replyTo = messenger;
         try {
@@ -117,10 +129,17 @@ public class HomeActivity extends Activity {
             Log.e("HomeActivity", "Error", e);
         }
         unbindService(networkServiceConnection);
+        serviceBound = false;
     }
 
-    public void clean(View view) {
-        new MissionOpenHelper(getBaseContext()).clear();
-        new CommandOpenHelper(getBaseContext()).clear();
+    private void bindService() {
+        if(serviceBound)
+            return;
+
+        Intent intent = new Intent(this, MissionMessagingService.class);
+        startService(intent);
+        networkServiceConnection = new NetworkServiceConnection();
+        bindService(intent, networkServiceConnection, Context.BIND_AUTO_CREATE);
+        serviceBound = true;
     }
 }

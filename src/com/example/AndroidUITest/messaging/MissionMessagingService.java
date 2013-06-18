@@ -16,7 +16,7 @@ public class MissionMessagingService extends Service {
 
     private final Messenger messenger;
 
-    private List<Messenger> clients = new ArrayList<Messenger>();
+    private final List<Messenger> clients = new ArrayList<Messenger>();
 
     public MissionMessagingService() {
         this.messenger = new Messenger(new IncomingHandler());
@@ -30,7 +30,6 @@ public class MissionMessagingService extends Service {
     private class IncomingHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
-            System.out.println("Message!!! "+msg.what);
             switch (msg.what) {
                 case REGISTER:
                     Log.d("MissionMessagingService", "Adding client: " + msg.replyTo);

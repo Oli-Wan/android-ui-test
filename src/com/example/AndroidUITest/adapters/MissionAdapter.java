@@ -12,8 +12,8 @@ import com.example.AndroidUITest.models.Mission;
 import java.util.List;
 
 public class MissionAdapter extends ArrayAdapter<Mission> {
-    private List<Mission> values;
-    private Context context;
+    private final List<Mission> values;
+    private final Context context;
 
     public MissionAdapter(Context context, List<Mission> objects) {
         super(context, R.layout.mission_item, objects);

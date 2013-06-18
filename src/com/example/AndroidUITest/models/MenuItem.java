@@ -6,8 +6,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 public class MenuItem {
-    private String name;
-    private Class<? extends Fragment> fragment;
+    private final String name;
+    private final Class<? extends Fragment> fragment;
 
     public MenuItem(String name, Class<? extends Fragment> fragment) {
         this.name = name;

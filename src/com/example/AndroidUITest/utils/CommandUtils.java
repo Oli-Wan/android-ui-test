@@ -31,7 +31,7 @@ public class CommandUtils {
         return entity;
     }
 
-    private static <T> List<Map<String, Object>> getChanges(T oldObject, T newObject) throws NoSuchFieldException, IllegalAccessException {
+    private static <T> List<Map<String, Object>> getChanges(T oldObject, T newObject) throws IllegalAccessException {
         List<Map<String, Object>> changes = new ArrayList<Map<String, Object>>();
         Class<?> klazz = oldObject.getClass();
         Field[] fields = klazz.getDeclaredFields();

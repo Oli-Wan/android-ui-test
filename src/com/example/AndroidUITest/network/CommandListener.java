@@ -10,10 +10,10 @@ import com.codebutler.android_websockets.SocketIOClient;
 import com.example.AndroidUITest.messaging.MissionMessagingService;
 import com.example.AndroidUITest.models.Command;
 import com.example.AndroidUITest.models.Mission;
-import com.example.AndroidUITest.utils.NetworkUtils;
-import com.example.AndroidUITest.storage.CommandOpenHelper;
-import com.example.AndroidUITest.storage.MissionOpenHelper;
+import com.example.AndroidUITest.storage.CommandDataSource;
+import com.example.AndroidUITest.storage.MissionDataSource;
 import com.example.AndroidUITest.utils.JSONUtils;
+import com.example.AndroidUITest.utils.NetworkUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.json.JSONArray;
@@ -24,10 +24,13 @@ import java.util.List;
 import java.util.Map;
 
 public class CommandListener {
-    private CommandOpenHelper commands;
-    private MissionOpenHelper missions;
+    private CommandDataSource commandDataSource;
+    private MissionDataSource missionDataSource;
     private SocketIOClient client;
     private Messenger messenger;
+    private Context context;
+    private NetworkServiceConnection serviceConnection;
+
     private boolean started = false;
 
     private CommandListener() {
@@ -45,21 +48,33 @@ public class CommandListener {
         if (started)
             return;
 
+        this.context = context;
+        this.serviceConnection = new NetworkServiceConnection();
+        this.commandDataSource = new CommandDataSource();
+        this.missionDataSource = new MissionDataSource();
+
         Intent intent = new Intent(context, MissionMessagingService.class);
         context.startService(intent);
-        context.bindService(intent, new NetworkServiceConnection(), Context.BIND_AUTO_CREATE);
+        context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
 
-        this.commands = new CommandOpenHelper(context);
-        this.missions = new MissionOpenHelper(context);
         this.client = new SocketIOClient(URI.create(NetworkUtils.BACKEND_URL), new CommandClient());
+
         parseCommands();
+
         started = true;
+    }
+
+    public void stop() {
+        if(!started)
+            return;
+
+        context.unbindService(serviceConnection);
+        started = false;
     }
 
     public boolean isStarted() {
         return started;
     }
-
 
     private class NetworkServiceConnection implements ServiceConnection {
         @Override
@@ -90,7 +105,7 @@ public class CommandListener {
                 Command command = extractCommandFromMap(list.get(0));
                 command.setStatus("read");
                 handleCommand(command.getData());
-                commands.create(command);
+                commandDataSource.create(command);
                 messenger.send(Message.obtain(null, MissionMessagingService.MISSION_UPDATED));
             } catch (RemoteException e) {
                 e.printStackTrace();
@@ -126,7 +141,7 @@ public class CommandListener {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
-                Command lastCmd = commands.getLastReceivedCommand();
+                Command lastCmd = commandDataSource.getLastReceivedCommand();
                 String params = "";
 
                 if (lastCmd != null && lastCmd.getDate() > 0) {
@@ -149,7 +164,7 @@ public class CommandListener {
                 for (Map<String, Object> cmdMap : commandList) {
                     Command command = extractCommandFromMap(cmdMap);
                     handleCommand(command.getData());
-                    commands.create(command);
+                    commandDataSource.create(command);
                 }
                 return null;
             }
@@ -193,7 +208,7 @@ public class CommandListener {
                     mission.setResponsible(change.get("new_val"));
                 }
             }
-            missions.incomingChanges(mission);
+            missionDataSource.incomingChanges(mission);
         }
     }
 }
