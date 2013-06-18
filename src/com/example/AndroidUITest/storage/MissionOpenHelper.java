@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 import com.example.AndroidUITest.models.Mission;
 
 import java.util.ArrayList;
@@ -73,7 +74,7 @@ public class MissionOpenHelper extends SQLiteOpenHelper {
     }
 
     public void incomingChanges(Mission mission) {
-        boolean missionExists = get(mission.getId()) == null;
+        boolean missionExists =  get(mission.getId()) != null;
         if (missionExists) {
             this.update(mission);
         } else {
@@ -83,6 +84,7 @@ public class MissionOpenHelper extends SQLiteOpenHelper {
 
 
     public void create(Mission mission) {
+        Log.d("MissionOpenHelper", "Create");
         ContentValues values = getContentValuesFromMission(mission);
         SQLiteDatabase db = this.getWritableDatabase();
         db.insert("mission", null, values);
@@ -90,6 +92,7 @@ public class MissionOpenHelper extends SQLiteOpenHelper {
     }
 
     public void update(Mission mission) {
+        Log.d("MissionOpenHelper", "Update");
         ContentValues values = getContentValuesFromMission(mission);
         SQLiteDatabase db = this.getWritableDatabase();
         db.update("mission", values, "id = ?", new String[]{String.valueOf(mission.getId())});

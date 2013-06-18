@@ -17,22 +17,18 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 public class NetworkUtils {
+    public static final String BACKEND_URL = "http://192.168.100.51:2403";
 
     public static JSONArray parseAsJsonArray(HttpResponse response) {
+        if (response == null)
+            return null;
+
         JSONArray jsonArray = null;
+        String result = getResponseAsString(response);
         try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-            StringBuilder result = new StringBuilder();
-            String l;
-            while ((l = in.readLine()) != null) {
-                result.append(l);
-            }
-            in.close();
-            jsonArray = new JSONArray(result.toString());
+            jsonArray = new JSONArray(result);
         } catch (JSONException e) {
             Log.d("NetworkUtils.parseAsJsonArray", "Couldn't parse JSON", e);
-        } catch (IOException e) {
-            Log.d("NetworkUtils.parseAsJsonArray", "Couldn't read response", e);
         }
         return jsonArray;
     }
@@ -46,6 +42,21 @@ public class NetworkUtils {
             Log.d("NetworkUtils.sendRequest", "Couldn't send request", e);
         }
         return response;
+    }
+
+    public static String getResponseAsString(HttpResponse response) {
+        StringBuilder result = new StringBuilder();
+        try {
+            BufferedReader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+            String l;
+            while ((l = in.readLine()) != null) {
+                result.append(l);
+            }
+            in.close();
+        } catch (IOException e) {
+            Log.d("NetworkUtils", "Couldn't read response", e);
+        }
+        return result.toString();
     }
 
     public static String encodeParams(String params) {
