@@ -15,12 +15,6 @@ import com.example.AndroidUITest.models.Mission;
 import com.example.AndroidUITest.storage.CommandOpenHelper;
 import com.example.AndroidUITest.storage.MissionOpenHelper;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public class UpdateMissionFragment extends Fragment implements View.OnClickListener {
 
     private Mission mission;
@@ -67,7 +61,7 @@ public class UpdateMissionFragment extends Fragment implements View.OnClickListe
         MissionOpenHelper missionOpenHelper = new MissionOpenHelper(getActivity().getBaseContext());
         Mission oldMission = missionOpenHelper.get(mission.getId());
 
-        new CommandOpenHelper(getActivity().getBaseContext()).createCommandIfNeeded(oldMission, mission);
+        new CommandOpenHelper(getActivity().getBaseContext()).createLocalCommand(oldMission, mission);
 
         missionOpenHelper.update(mission);
     }

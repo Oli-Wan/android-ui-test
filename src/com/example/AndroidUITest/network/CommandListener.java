@@ -10,21 +10,16 @@ import com.codebutler.android_websockets.SocketIOClient;
 import com.example.AndroidUITest.messaging.MissionMessagingService;
 import com.example.AndroidUITest.models.Command;
 import com.example.AndroidUITest.models.Mission;
-import com.example.AndroidUITest.network.utils.NetworkUtils;
+import com.example.AndroidUITest.utils.NetworkUtils;
 import com.example.AndroidUITest.storage.CommandOpenHelper;
 import com.example.AndroidUITest.storage.MissionOpenHelper;
 import com.example.AndroidUITest.utils.JSONUtils;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.net.URI;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 

@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import com.example.AndroidUITest.models.Command;
 import com.example.AndroidUITest.models.Identifiable;
+import com.example.AndroidUITest.utils.CommandUtils;
 import com.example.AndroidUITest.utils.JSONUtils;
 
 import java.lang.reflect.Field;
@@ -50,7 +51,7 @@ public class CommandOpenHelper extends SQLiteOpenHelper {
     public List<Command> getAll() {
         ArrayList<Command> commands = new ArrayList<Command>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM command", null);
+        Cursor cursor = db.rawQuery("SELECT * FROM "+TABLE_NAME, null);
         if (cursor.moveToFirst()) {
             do {
                 Command command = getCommandFromCursor(cursor);
@@ -65,7 +66,7 @@ public class CommandOpenHelper extends SQLiteOpenHelper {
     public void create(Command command) {
         SQLiteDatabase writableDatabase = this.getWritableDatabase();
         ContentValues values = getContentValuesFromCommand(command);
-        writableDatabase.insert("command", null, values);
+        writableDatabase.insert(TABLE_NAME, null, values);
         writableDatabase.close();
     }
 
@@ -84,7 +85,7 @@ public class CommandOpenHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = getWritableDatabase();
         Cursor cursor = db.query(TABLE_NAME, new String[]{COL_ID, "MAX(" + COL_DATE + ")", COL_ORIGIN, COL_DATA, COL_STATUS}, null, null, null, null, null);
         Command command = null;
-        if (cursor.getCount() > 0 && cursor.moveToFirst()) {
+        if (cursor.moveToFirst()) {
             command = getCommandFromCursor(cursor);
         }
         cursor.close();
@@ -110,62 +111,21 @@ public class CommandOpenHelper extends SQLiteOpenHelper {
         return commands;
     }
 
-    public void createCommandIfNeeded(Identifiable oldObject, Identifiable newObject) {
-
+    public void createLocalCommand(Identifiable oldObject, Identifiable newObject) {
         try {
-            List<Map<String, Object>> changes = getChanges(oldObject, newObject);
-            Map<String, Object> data = new HashMap<String, Object>();
-            String[] fqdn = oldObject.getClass().getName().split("\\.");
-            String entity;
-            Log.d("CommandOpenHelper", String.valueOf(fqdn.length));
-            if (fqdn.length > 0) {
-                entity = fqdn[fqdn.length - 1];
-            } else {
-                entity = oldObject.getClass().getName();
-            }
-            Log.d("CommandOpenHelper", entity);
-            data.put("entity", entity.toLowerCase());
-            data.put("type", "update");
-            data.put("id", oldObject.getId());
-            data.put("changes", changes);
+            Map<String, Object> data = CommandUtils.getCommandData(oldObject, newObject);
+
             Command command = new Command();
             command.setOrigin("android");
             command.setData(data);
             command.setDate(new Date().getTime());
             command.setStatus("waiting");
-            Log.d("CommandOpenHelper", command.toString());
             this.create(command);
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
-    }
-
-    private <T> List<Map<String, Object>> getChanges(T oldObject, T newObject) throws NoSuchFieldException, IllegalAccessException {
-        List<Map<String, Object>> changes = new ArrayList<Map<String, Object>>();
-        Class<?> klazz = oldObject.getClass();
-        Field[] fields = klazz.getDeclaredFields();
-        for (Field field : fields) {
-            field.setAccessible(true);
-            Object oldValue = field.get(oldObject);
-            Object newValue = field.get(newObject);
-
-            if (oldValue == null && newValue != null) {
-                Map<String, Object> change = new HashMap<String, Object>();
-                change.put("attribute", field.getName());
-                change.put("old_val", "");
-                change.put("new_val", newValue);
-                changes.add(change);
-            } else if (oldValue != null && !(oldValue.equals(newValue))) {
-                Map<String, Object> change = new HashMap<String, Object>();
-                change.put("attribute", field.getName());
-                change.put("old_val", oldValue);
-                change.put("new_val", newValue);
-                changes.add(change);
-            }
-        }
-        return changes;
     }
 
     private Command getCommandFromCursor(Cursor cursor) {

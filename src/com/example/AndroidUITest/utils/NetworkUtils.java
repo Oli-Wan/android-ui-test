@@ -1,4 +1,4 @@
-package com.example.AndroidUITest.network.utils;
+package com.example.AndroidUITest.utils;
 
 import android.util.Log;
 import org.apache.http.HttpRequest;
