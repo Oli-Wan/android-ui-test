@@ -1,14 +1,10 @@
-package com.example.AndroidUITest.network.utils;
+package com.example.AndroidUITest.utils;
 
 import android.util.Log;
-import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONArray;
-import org.json.JSONException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,25 +13,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 public class NetworkUtils {
-
-    public static JSONArray parseAsJsonArray(HttpResponse response) {
-        JSONArray jsonArray = null;
-        try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-            StringBuilder result = new StringBuilder();
-            String l;
-            while ((l = in.readLine()) != null) {
-                result.append(l);
-            }
-            in.close();
-            jsonArray = new JSONArray(result.toString());
-        } catch (JSONException e) {
-            Log.d("NetworkUtils.parseAsJsonArray", "Couldn't parse JSON", e);
-        } catch (IOException e) {
-            Log.d("NetworkUtils.parseAsJsonArray", "Couldn't read response", e);
-        }
-        return jsonArray;
-    }
+    public static final String BACKEND_URL = "http://192.168.100.51:2403";
 
     public static HttpResponse sendRequest(HttpRequestBase request) {
         HttpClient client = new DefaultHttpClient();
@@ -45,7 +23,23 @@ public class NetworkUtils {
         } catch (IOException e) {
             Log.d("NetworkUtils.sendRequest", "Couldn't send request", e);
         }
+
         return response;
+    }
+
+    public static String getResponseAsString(HttpResponse response) {
+        StringBuilder result = new StringBuilder();
+        try {
+            BufferedReader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+            String l;
+            while ((l = in.readLine()) != null) {
+                result.append(l);
+            }
+            in.close();
+        } catch (IOException e) {
+            Log.d("NetworkUtils", "Couldn't read response", e);
+        }
+        return result.toString();
     }
 
     public static String encodeParams(String params) {

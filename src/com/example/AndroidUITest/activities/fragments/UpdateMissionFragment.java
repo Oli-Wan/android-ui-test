@@ -12,7 +12,8 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import com.example.AndroidUITest.R;
 import com.example.AndroidUITest.models.Mission;
-import com.example.AndroidUITest.storage.MissionOpenHelper;
+import com.example.AndroidUITest.storage.CommandDataSource;
+import com.example.AndroidUITest.storage.MissionDataSource;
 
 public class UpdateMissionFragment extends Fragment implements View.OnClickListener {
 
@@ -35,7 +36,7 @@ public class UpdateMissionFragment extends Fragment implements View.OnClickListe
 
         Bundle extras = getActivity().getIntent().getExtras();
         long missionId = extras.getLong("MISSION_ID");
-        this.mission = new MissionOpenHelper(getActivity().getBaseContext()).get(missionId);
+        this.mission = new MissionDataSource().get(missionId);
 
         bindDataWithView(view);
 
@@ -57,6 +58,11 @@ public class UpdateMissionFragment extends Fragment implements View.OnClickListe
     @Override
     public void onClick(View view) {
         bindViewWithData();
-        new MissionOpenHelper(getActivity().getBaseContext()).update(mission);
+        MissionDataSource missionDataSource= new MissionDataSource();
+        Mission oldMission = missionDataSource.get(mission.getId());
+
+        new CommandDataSource().createLocalCommand(oldMission, mission);
+
+        missionDataSource.update(mission);
     }
 }

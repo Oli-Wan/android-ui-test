@@ -10,24 +10,27 @@ import com.codebutler.android_websockets.SocketIOClient;
 import com.example.AndroidUITest.messaging.MissionMessagingService;
 import com.example.AndroidUITest.models.Command;
 import com.example.AndroidUITest.models.Mission;
-import com.example.AndroidUITest.network.utils.NetworkUtils;
-import com.example.AndroidUITest.storage.CommandOpenHelper;
-import com.example.AndroidUITest.storage.MissionOpenHelper;
+import com.example.AndroidUITest.storage.CommandDataSource;
+import com.example.AndroidUITest.storage.MissionDataSource;
+import com.example.AndroidUITest.utils.JSONUtils;
+import com.example.AndroidUITest.utils.NetworkUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URI;
+import java.util.List;
+import java.util.Map;
 
 public class CommandListener {
-
-    private static final String BACKEND_URL = "http://192.168.100.51:2403";
-    private CommandOpenHelper commands;
-    private MissionOpenHelper missions;
+    private CommandDataSource commandDataSource;
+    private MissionDataSource missionDataSource;
     private SocketIOClient client;
     private Messenger messenger;
+    private Context context;
+    private NetworkServiceConnection serviceConnection;
+
     private boolean started = false;
 
     private CommandListener() {
@@ -42,24 +45,36 @@ public class CommandListener {
     }
 
     public void start(Context context) {
-        if(started)
+        if (started)
             return;
+
+        this.context = context;
+        this.serviceConnection = new NetworkServiceConnection();
+        this.commandDataSource = new CommandDataSource();
+        this.missionDataSource = new MissionDataSource();
 
         Intent intent = new Intent(context, MissionMessagingService.class);
         context.startService(intent);
-        context.bindService(intent, new NetworkServiceConnection(), Context.BIND_AUTO_CREATE);
+        context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
 
-        this.commands = new CommandOpenHelper(context);
-        this.missions = new MissionOpenHelper(context);
-        this.client = new SocketIOClient(URI.create(BACKEND_URL), new CommandClient());
+        this.client = new SocketIOClient(URI.create(NetworkUtils.BACKEND_URL), new CommandClient());
+
         parseCommands();
+
         started = true;
     }
 
-    public boolean getStarted() {
-        return started;
+    public void stop() {
+        if(!started)
+            return;
+
+        context.unbindService(serviceConnection);
+        started = false;
     }
 
+    public boolean isStarted() {
+        return started;
+    }
 
     private class NetworkServiceConnection implements ServiceConnection {
         @Override
@@ -84,11 +99,14 @@ public class CommandListener {
             if (!event.equals("commands:new"))
                 return;
 
+            String argumentsString = arguments.toString();
             try {
-                createCommandFromJSON(arguments.getJSONObject(0));
+                List<Map<String, Object>> list = JSONUtils.decode(argumentsString, List.class);
+                Command command = extractCommandFromMap(list.get(0));
+                command.setStatus("read");
+                handleCommand(command.getData());
+                commandDataSource.create(command);
                 messenger.send(Message.obtain(null, MissionMessagingService.MISSION_UPDATED));
-            } catch (JSONException e) {
-                e.printStackTrace();
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
@@ -114,6 +132,7 @@ public class CommandListener {
 
         @Override
         public void onMessage(String message) {
+            Log.d("CommandListener", message);
         }
 
     }
@@ -122,7 +141,7 @@ public class CommandListener {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
-                Command lastCmd = commands.getLastReceivedCommand();
+                Command lastCmd = commandDataSource.getLastReceivedCommand();
                 String params = "";
 
                 if (lastCmd != null && lastCmd.getDate() > 0) {
@@ -130,24 +149,22 @@ public class CommandListener {
                 }
 
                 System.out.println(params);
-                String getUrl = BACKEND_URL + "/commands" + "?" + NetworkUtils.encodeParams(params);
+                String getUrl = NetworkUtils.BACKEND_URL + "/commands" + "?" + NetworkUtils.encodeParams(params);
                 System.out.println(getUrl);
 
                 HttpGet get = new HttpGet(getUrl);
 
                 HttpResponse response = NetworkUtils.sendRequest(get);
-                JSONArray jsonArray = NetworkUtils.parseAsJsonArray(response);
+                String responseAsString = NetworkUtils.getResponseAsString(response);
+                List<Map<String, Object>> commandList = JSONUtils.decode(responseAsString, List.class);
 
-                if (jsonArray == null)
+                if (commandList == null)
                     return null;
 
-                try {
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        JSONObject obj = jsonArray.getJSONObject(i);
-                        createCommandFromJSON(obj);
-                    }
-                } catch (JSONException e) {
-                    Log.d("CommandListener.parseCommands", "Couldn't read command from Array", e);
+                for (Map<String, Object> cmdMap : commandList) {
+                    Command command = extractCommandFromMap(cmdMap);
+                    handleCommand(command.getData());
+                    commandDataSource.create(command);
                 }
                 return null;
             }
@@ -159,44 +176,39 @@ public class CommandListener {
         }.execute();
     }
 
-    private Command createCommandFromJSON(JSONObject obj) {
-        Command command = null;
-        try {
-            command = new Command();
-            command.setDate(obj.getLong("date"));
-            command.setOrigin(obj.getString("origin"));
-            command.setData(obj.getString("data"));
-            handleCommand(command.getData());
-            commands.create(command);
-        } catch (JSONException e) {
-            Log.d("CommandListener.createCommandFromJson", "Couldn't read json", e);
-        }
+    private Command extractCommandFromMap(Map<String, Object> cmdMap) {
+        Command command = new Command();
+        command.setStatus("read");
+        command.setDate((Long) cmdMap.get("date"));
+        command.setOrigin((String) cmdMap.get("origin"));
+        command.setData((Map<String, Object>) cmdMap.get("data"));
         return command;
     }
 
-    private void handleCommand(String data) throws JSONException {
-        JSONObject json = new JSONObject(data);
-        if (json.getString("entity").equalsIgnoreCase("mission")) {
-            if (!json.has("changes"))
-                return;
+    private void handleCommand(Map<String, Object> data) {
+        if (!data.containsKey("entity") || !data.containsKey("changes") || !data.containsKey("id")) {
+            Log.e("CommandListener", "Badly formatted data : " + JSONUtils.encode(data));
+            return;
+        }
 
-            JSONArray changes = json.getJSONArray("changes");
+        String entity = (String) data.get("entity");
+        if (entity.equalsIgnoreCase("mission")) {
             Mission mission = new Mission();
-            mission.setId(json.getLong("id"));
-            for (int i = 0; i < changes.length(); i++) {
-                JSONObject change = changes.getJSONObject(i);
-                String attribute = change.getString("attribute");
+            mission.setId((Long) data.get("id"));
+            List<Map<String, String>> changes = (List<Map<String, String>>) data.get("changes");
+            for (Map<String, String> change : changes) {
+                String attribute = change.get("attribute");
                 if (attribute.equalsIgnoreCase("vehicle")) {
-                    mission.setVehicle(change.getString("new_val"));
+                    mission.setVehicle(change.get("new_val"));
                 } else if (attribute.equalsIgnoreCase("observation")) {
-                    mission.setObservation(change.getString("new_val"));
+                    mission.setObservation(change.get("new_val"));
                 } else if (attribute.equalsIgnoreCase("type")) {
-                    mission.setType(change.getString("new_val"));
+                    mission.setType(change.get("new_val"));
                 } else if (attribute.equalsIgnoreCase("responsible")) {
-                    mission.setResponsible(change.getString("new_val"));
+                    mission.setResponsible(change.get("new_val"));
                 }
             }
-            missions.incomingChanges(mission);
+            missionDataSource.incomingChanges(mission);
         }
     }
 }

@@ -9,13 +9,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.example.AndroidUITest.R;
 import com.example.AndroidUITest.models.MenuItem;
-import com.example.AndroidUITest.models.Mission;
 
 import java.util.List;
 
 public class MenuAdapter extends ArrayAdapter<MenuItem> {
-    private List<MenuItem> values;
-    private Context context;
+    private final List<MenuItem> values;
+    private final Context context;
 
     public MenuAdapter (Context context, List<MenuItem> objects) {
         super(context, R.layout.hidden_menu_item, objects);
